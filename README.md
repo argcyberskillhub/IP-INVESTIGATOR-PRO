@@ -58,8 +58,8 @@ Depending on the implemented modules and available API access, it may support IP
   <img
     src="screenshots/main-interface.png"
     alt="IP Investigator Pro Main Interface"
-    width="600"
-    height="400"
+    width="500"
+    height="600"
   >
 </p>
 
