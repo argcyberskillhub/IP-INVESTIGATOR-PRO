@@ -126,13 +126,17 @@ Create a local `.env` file or configure environment variables.
 Example `.env.example`:
 
 ```dotenv
-IPINFO_TOKEN=your_ipinfo_token_here
-SHODAN_API_KEY=your_shodan_api_key_here
+IPINFO_TOKEN=
+SHODAN_API_KEY=
+# optional: ip-api pro key (enables HTTPS)
+IPAPI_KEY=
 ```
+
+Copy it: `cp .env.example .env`, then fill in your own values.
 
 Do not commit real credentials to GitHub.
 
-**Important:** A `.env` file is not automatically read by Python unless the script loads it or the required environment variables are configured. The current script must use `os.getenv()` or an appropriate configuration loader to read these values.
+The script loads `.env` automatically (python-dotenv). `.env` is listed in `.gitignore`.
 
 For Windows PowerShell:
 
@@ -168,13 +172,29 @@ python ip_investigator_v3.py
 python ip_investigator_v3.py 8.8.8.8
 ```
 
-### Single-IP Mode
+### Single-IP Mode (no menu)
 
 ```bash
 python ip_investigator_v3.py --single 1.1.1.1
 ```
 
-These commands follow the usage examples in the script header. Make sure the implementation supports each argument before relying on it.
+Prints the report and exits (exit code 0 = OK, 1 = invalid / non-public IP or no data).
+
+### JSON Output (scripts, non-interactive)
+
+```bash
+python ip_investigator_v3.py --json 8.8.8.8
+python ip_investigator_v3.py --json 8.8.8.8 | jq .classification
+```
+
+The JSON document goes to stdout; logs and warnings go to stderr. Without a terminal (cron, pipes) use `--single` or `--json`: the menu mode exits cleanly on end of input.
+
+### Notes
+
+- Private, loopback, link-local, reserved and CGNAT addresses (e.g. `192.168.1.1`, `127.0.0.1`) are refused locally: nothing is sent to online services.
+- ip-api.com free plan is HTTP only (unencrypted, 45 requests/min, non-commercial). Set `IPAPI_KEY` (pro plan) in `.env` to switch to HTTPS.
+- The ipinfo token is sent in the `Authorization` header. Shodan only accepts `?key=`; the key is masked in every error message.
+- Mobile / broadband / datacenter classification relies first on the ip-api `mobile` and `hosting` flags, then on a small ASN list (India, Benin, Africa, France, USA, clouds) and whole-word keywords. It is an estimate, not proof.
 
 ---
 
